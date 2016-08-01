@@ -166,7 +166,7 @@ object WMMatching {
     // Generate the leaf vertices of a blossom.
     def blossomLeaves(b: Int): List[Int] = {
       if (b < nvertex) List(b)
-      else blossomchilds(b).toList.map(blossomLeaves).flatten
+      else blossomchilds(b).toList.flatMap(blossomLeaves)
     }
 
     // Assign label t to the top-level blossom containing vertex w
