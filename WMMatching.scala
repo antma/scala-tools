@@ -30,8 +30,8 @@ object WMMatching {
     one edge between any two vertices; no vertex has an edge to itself.
     Vertices are identified by consecutive, non-negative integers.
 
-    Return a list "mate", such that mate[i] == j if vertex i is
-    matched to vertex j, and mate[i] == -1 if vertex i is not matched.
+    Return a list "mate", such that mate(i) == j if vertex i is
+    matched to vertex j, and mate(i) == -1 if vertex i is not matched.
 
     This function takes time O(n ** 3).
 
@@ -52,10 +52,10 @@ object WMMatching {
     // Find the maximum edge weight.
     val maxweight = edges.map(_._3).max.max(0)
     // If p is an edge endpoint,
-    // endpoint[p] is the vertex to which endpoint p is attached.
+    // endpoint(p) is the vertex to which endpoint p is attached.
     val endpoint:Array[Int] = edges.map ( x => List(x._1, x._2) ).flatten.toArray
     //If v is a vertex,
-    //neighbend[v] is the list of remote endpoints of the edges attached to v.
+    //neighbend(v) is the list of remote endpoints of the edges attached to v.
     val neighbend:Array[List[Int]] = Array.fill(nvertex)(Nil)
     edges.zipWithIndex.reverse.foreach { case ((i, j, w), k) => neighbend(i) = (2 * k + 1) :: neighbend(i); neighbend(j) = (2 * k) :: neighbend(j) }
 
@@ -67,72 +67,72 @@ object WMMatching {
 
     /*
     If b is a top-level blossom,
-    label[b] is 0 if b is unlabeled (free);
+    label(b) is 0 if b is unlabeled (free);
                 1 if b is an S-vertex/blossom;
                 2 if b is a T-vertex/blossom.
     The label of a vertex is found by looking at the label of its
     top-level containing blossom.
     If v is a vertex inside a T-blossom,
-    label[v] is 2 iff v is reachable from an S-vertex outside the blossom.
+    label(v) is 2 iff v is reachable from an S-vertex outside the blossom.
     Labels are assigned during a stage and reset after each augmentation.
     */
     var label: Array[Int] = Array.fill(2 * nvertex)(0)
     /*
     If b is a labeled top-level blossom,
-    labelend[b] is the remote endpoint of the edge through which b obtained
+    labelend(b) is the remote endpoint of the edge through which b obtained
     its label, or -1 if b's base vertex is single.
-    If v is a vertex inside a T-blossom and label[v] == 2,
-    labelend[v] is the remote endpoint of the edge through which v is
+    If v is a vertex inside a T-blossom and label(v) == 2,
+    labelend(v) is the remote endpoint of the edge through which v is
     reachable from outside the blossom.
     */
     val labelend: Array[Int] = Array.fill(2 * nvertex)(-1)
 
     /*
-    If v is a vertex, inblossom[v] is the top-level blossom to which v belongs.
+    If v is a vertex, inblossom(v) is the top-level blossom to which v belongs.
     If v is a top-level vertex, v is itself a blossom (a trivial blossom)
-    and inblossom[v] == v.
+    and inblossom(v) == v.
     Initially all vertices are top-level trivial blossoms.
     */
     val inblossom: Array[Int] = Array.range(0, nvertex)
 
     /*
     If b is a sub-blossom,
-    blossomparent[b] is its immediate parent (sub-)blossom.
-    If b is a top-level blossom, blossomparent[b] is -1.
+    blossomparent(b) is its immediate parent (sub-)blossom.
+    If b is a top-level blossom, blossomparent(b) is -1.
     */
     val blossomparent: Array[Int] = Array.fill(2 * nvertex)(-1)
     /*
     If b is a non-trivial (sub-)blossom,
-    blossomchilds[b] is an ordered list of its sub-blossoms, starting with
+    blossomchilds(b) is an ordered list of its sub-blossoms, starting with
     the base and going round the blossom.
     */
     val blossomchilds: Array[Array[Int]] = new Array(2 * nvertex)
 
     // If b is a (sub-)blossom,
-    // blossombase[b] is its base VERTEX (i.e. recursive sub-blossom).
+    // blossombase(b) is its base VERTEX (i.e. recursive sub-blossom).
     val blossombase: Array[Int] = Array.tabulate(2*nvertex) { i:Int => if (i < nvertex) i else -1 }
 
     /*
     If b is a non-trivial (sub-)blossom,
-    blossomendps[b] is a list of endpoints on its connecting edges,
-    such that blossomendps[b][i] is the local endpoint of blossomchilds[b][i]
-    on the edge that connects it to blossomchilds[b][wrap(i+1)].
+    blossomendps(b) is a list of endpoints on its connecting edges,
+    such that blossomendps(b)(i) is the local endpoint of blossomchilds(b)(i)
+    on the edge that connects it to blossomchilds(b)(wrap(i+1)).
     */
     val blossomendps: Array[Array[Int]] = new Array(2 * nvertex)
 
     /*
     If v is a free vertex (or an unreached vertex inside a T-blossom),
-    bestedge[v] is the edge to an S-vertex with least slack,
+    bestedge(v) is the edge to an S-vertex with least slack,
     or -1 if there is no such edge.
     If b is a (possibly trivial) top-level S-blossom,
-    bestedge[b] is the least-slack edge to a different S-blossom,
+    bestedge(b) is the least-slack edge to a different S-blossom,
     or -1 if there is no such edge.
     This is used for efficient computation of delta2 and delta3.
     */
     var bestedge: Array[Int] = Array.fill(2 * nvertex)(-1)
 
     // If b is a non-trivial top-level S-blossom,
-    // blossombestedges[b] is a list of least-slack edges to neighbouring
+    // blossombestedges(b) is a list of least-slack edges to neighbouring
     // S-blossoms, or None if no such list has been computed yet.
     // This is used for efficient computation of delta3.
     val blossombestedges: Array[List[Int]] = new Array(2 * nvertex)
@@ -144,16 +144,16 @@ object WMMatching {
     for (v <- nvertex until (2 * nvertex)) unusedblossoms.push(v)
 
     // If v is a vertex,
-    // dualvar[v] = 2 * u(v) where u(v) is the v's variable in the dual
+    // dualvar(v) = 2 * u(v) where u(v) is the v's variable in the dual
     // optimization problem (multiplication by two ensures integer values
     // throughout the algorithm if all edge weights are integers).
     // If b is a non-trivial blossom,
-    // dualvar[b] = z(b) where z(b) is b's variable in the dual optimization
+    // dualvar(b) = z(b) where z(b) is b's variable in the dual optimization
     // problem.
     val dualvar: Array[Int] = Array.tabulate(2*nvertex) { i:Int => if (i < nvertex) maxweight else 0 }
 
-    // If allowedge[k] is true, edge k has zero slack in the optimization
-    // problem; if allowedge[k] is false, the edge's slack may or may not
+    // If allowedge(k) is true, edge k has zero slack in the optimization
+    // problem; if allowedge(k) is false, the edge's slack may or may not
     // be zero.
 
     var allowedge: Array[Boolean] = Array.fill(nedge)(false)
@@ -492,10 +492,10 @@ object WMMatching {
           assert(blossombase(bt) == t)
           if (bt >= nvertex)
             augmentBlossom(bt, j)
-          //Update mate[j]
+          //Update mate(j)
           mate(j) = labelend(bt)
           // Keep the opposite endpoint;
-          // it will be assigned to mate[s] in the next step.
+          // it will be assigned to mate(s) in the next step.
           val np = labelend(bt) ^ 1
           f(ns, np)
         }
