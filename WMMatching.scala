@@ -412,8 +412,14 @@ object WMMatching {
       // Bubble up through the blossom tree from vertex v to an immediate
       // isub-blossom of b.
       def rotate(a: Array[Int], shift:Int): Array[Int] = {
-        val (h, t) = a.toList.splitAt(shift)
-        (t ::: h).toArray
+        if (shift == 0) a
+        else {
+          val n = a.size
+          val b: Array[Int] = new Array(n)
+          Array.copy(a, shift, b, 0, n - shift)
+          Array.copy(a, 0, b, n - shift, shift)
+          b
+        }
       }
       var t = v
       while (blossomparent(t) != b) {
