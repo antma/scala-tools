@@ -47,7 +47,7 @@ object WMMatching {
 
     */
     val edges_a: Array[(Int, Int, Int)] = edges.toArray
-    val nedge = edges.size
+    val nedge = edges_a.length
     val nvertex = 1 + edges.map ( x => x._1.max (x._2) ).max
     // Find the maximum edge weight.
     val maxweight = edges.map(_._3).max.max(0)
@@ -58,7 +58,6 @@ object WMMatching {
     //neighbend[v] is the list of remote endpoints of the edges attached to v.
     val neighbend:Array[List[Int]] = Array.fill(nvertex)(Nil)
     edges.zipWithIndex.reverse.foreach { case ((i, j, w), k) => neighbend(i) = (2 * k + 1) :: neighbend(i); neighbend(j) = (2 * k) :: neighbend(j) }
-
 
     // If v is a vertex,
     // mate(v) is the remote endpoint of its matched edge, or -1 if it is single
@@ -109,10 +108,8 @@ object WMMatching {
     */
     val blossomchilds: Array[Array[Int]] = new Array(2 * nvertex)
 
-    /*
-    If b is a (sub-)blossom,
-    blossombase[b] is its base VERTEX (i.e. recursive sub-blossom).
-    */
+    // If b is a (sub-)blossom,
+    // blossombase[b] is its base VERTEX (i.e. recursive sub-blossom).
     val blossombase: Array[Int] = Array.tabulate(2*nvertex) { i:Int => if (i < nvertex) i else -1 }
 
     /*
@@ -172,11 +169,10 @@ object WMMatching {
       else blossomchilds(b).toList.map(blossomLeaves).flatten
     }
 
-    /*
-    Assign label t to the top-level blossom containing vertex w
-    and record the fact that w was reached through the edge with
-    remote endpoint p.
-    */
+    // Assign label t to the top-level blossom containing vertex w
+    // and record the fact that w was reached through the edge with
+    // remote endpoint p.
+
     def assignLabel(w:Int, t:Int, p:Int) : Unit = {
       val b = inblossom(w)
       assert(label(w) == 0 && label(b) == 0)
@@ -192,20 +188,16 @@ object WMMatching {
         for (o <- blossomLeaves(b)) queue.push(o)
 
       } else if (t == 2) {
-        /*
-        b became a T-vertex/blossom; assign label S to its mate.
-        (If b is a non-trivial blossom, its base is the only vertex
-        with an external mate.)
-        */
+        // b became a T-vertex/blossom; assign label S to its mate.
+        // (If b is a non-trivial blossom, its base is the only vertex
+        // with an external mate.)
         val base = blossombase(b)
         assert(mate(base) >= 0)
         assignLabel(endpoint(mate(base)), 1, mate(base) ^ 1)
       }
     }
-    /*
-    Trace back from vertices v and w to discover either a new blossom
-    or an augmenting path. Return the base vertex of the new blossom or -1.
-    */
+    // Trace back from vertices v and w to discover either a new blossom
+    // or an augmenting path. Return the base vertex of the new blossom or -1.
     def scanBlossom(v:Int, w:Int) = {
       // Trace back from v and w, placing breadcrumbs as we go.
       def scan(v:Int, w:Int, path: List[Int]) : (Int, List[Int]) = {
@@ -249,8 +241,6 @@ object WMMatching {
     def addBlossom(base: Int, k: Int) = {
       val (v, w, wt) = edges_a(k)
       val bb = inblossom(base)
-      //val bv = inblossom(v)
-      //val bw = inblossom(w)
       // Create blossom.
       //val b = unusedblossoms.dequeue()
       val b = unusedblossoms.pop()
@@ -259,8 +249,6 @@ object WMMatching {
       blossomparent(b) = -1
       blossomparent(bb) = b
       // Make list of sub-blossoms and their interconnecting edge endpoints.
-      //blossomchilds[b] = path = [ ]
-      //blossomendps[b] = endps = [ ]
 
       def traceBack(v:Int, d:Int, path:List[Int], endps:List[Int]): (List[Int], List[Int]) = {
         val bv = inblossom(v)
@@ -281,7 +269,6 @@ object WMMatching {
       val (path2, endps2) = traceBack(w, 1, Nil, Nil)
       blossomchilds(b) = (bb :: path1 ::: (path2.reverse)).toArray
       blossomendps(b) = (endps1 ::: (endps2.reverse)).toArray
-
 
       // Set label to S.
       assert(label(bb) == 1)
@@ -343,7 +330,7 @@ object WMMatching {
       // relabeled.
       if (!endstage && label(b) == 2) {
         // Start at the sub-blossom through which the expanding
-        // blossom obtained its label, and relabel sub-blossoms untili
+        // blossom obtained its label, and relabel sub-blossoms until
         // we reach the base.
         // Figure out through which sub-blossom the expanding blossom
         // obtained its label initially.
@@ -624,13 +611,11 @@ object WMMatching {
       // Compute delta2: the minimum slack on any edge between
       // an S-vertex and a free vertex.
 
-
       for (v <- 0 until nvertex) {
         if (label(inblossom(v)) == 0 && bestedge(v) != -1) {
           dt.update (2, slack(bestedge(v)), bestedge(v))
         }
       }
-
 
       // Compute delta3: half the minimum slack on any edge between
       // a pair of S-blossoms.
@@ -761,4 +746,3 @@ object WMMatching {
     maxWeightMatching (edges.map { x => (x._1, x._2, maxweight - x._3) }, true)
   }
 }
-
