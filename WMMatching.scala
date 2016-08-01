@@ -186,7 +186,6 @@ object WMMatching {
         //b became an S-vertex/blossom; add it(s vertices) to the queue.
         //queue ++= blossomLeaves(b)
         for (o <- blossomLeaves(b)) queue.push(o)
-
       } else if (t == 2) {
         // b became a T-vertex/blossom; assign label S to its mate.
         // (If b is a non-trivial blossom, its base is the only vertex
@@ -297,8 +296,6 @@ object WMMatching {
           val (i, j) = if (inblossom(e._2) == b) (e._2, e._1) else (e._1, e._2)
           val bj = inblossom(j)
           if (bj != b && label(bj) == 1 && (bestedgeto(bj) == -1 || slack(k) < slack(bestedgeto(bj)))) bestedgeto(bj) = k
-          else ()
-
         }
         // Forget about least-slack edges of the subblossom.
         blossombestedges(bv) = null
@@ -338,7 +335,6 @@ object WMMatching {
         val entrychild = inblossom(endpoint(labelend(b) ^ 1))
         // Decide in which direction we will go round the blossom.
         var j = blossomchilds(b).indexOf(entrychild)
-        //val l = blossomchilds(b).length
         val l1 = blossomchilds(b).length - 1
         // Start index is odd; go forward and wrap.
         // Start index is even; go backward.
@@ -378,7 +374,6 @@ object WMMatching {
           if (label(bv) == 1) {
             // This sub-blossom just got label S through one of its
             // neighbours; leave it.
-            //continue
           } else {
             (blossomLeaves(bv).find(x => label(x) != 0)) match {
               case Some(v) => {
@@ -435,7 +430,6 @@ object WMMatching {
       val (jstep, endptrick) =
         if ((j & 1) != 0) ( (j:Int) => { if (j == l1) 0 else (j + 1) }  , 0)
         else ((j:Int) => { if (j == 0) l1 else (j - 1) } , 1)
-
       // Move along the blossom until we get to the base.
       while (j != 0) {
         // Step to the next sub-blossom and augment it recursively.
@@ -479,7 +473,6 @@ object WMMatching {
         // Trace one step back.
         if (labelend(bs) == -1) {
           //Reached single vertex; stop.
-          ()
         } else {
           val t = endpoint(labelend(bs))
           val bt = inblossom(t)
