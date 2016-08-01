@@ -47,12 +47,29 @@ object Checker {
       case x :: xs => result (xs, a, s + (if (a(x._1) == x._2) x._3 else 0))
     }
   }
-  def check(edges: List[(Int, Int, Int)], a: Array[Int], b: Array[Int] ) = {
+  def edgesRandomShuffle(edges: List[(Int, Int, Int)], r: Random): List[(Int, Int, Int)] = {
+    val a = edges.toArray
+    var n = a.length
+    while (n > 1) {
+      val i = r.nextInt (n)
+      val e = a(i)
+      a(i) = a(n-1)
+      a(n-1) = e
+      n -= 1
+    }
+    for (i <- 0 until n) {
+      if (r.nextBoolean()) {
+        a(i) = (a(i)._2, a(i)._1, a(i)._3)
+      }
+    }
+    a.toList
+  }
+  def check(edges: List[(Int, Int, Int)], a: Array[Int], b: Array[Int], sa: String, sb: String ) = {
     assert (a.length == b.length)
     val ra = result(edges, a, 0)
-    printf ("prune solution %d, %s\n", ra, a.toList)
+    printf ("%s solution %d, %s\n", sa, ra, a.toList)
     val rb = result(edges, b, 0)
-    printf ("matcher solution %d, %s\n", rb, b.toList)
+    printf ("%s solution %d, %s\n", sb, rb, b.toList)
     assert(ra == rb)
   }
 }
@@ -63,30 +80,28 @@ object TestWMMatching extends App {
     val r = new Random(seed)
     val edges = (for (j <- 1 until n; i <- 0 until j) yield (i, j, r.nextInt(max_weight-min_weight)+min_weight)).toList
     //println (edges)
-    val a = PruneMatcher.minWeightMatching(edges)
+    val (sa, a) =
+      if (n <= 20) ("prune", PruneMatcher.minWeightMatching(edges))
+      else ("shuffle", WMMatching.minWeightMatching(Checker.edgesRandomShuffle(edges, r)))
     val b = WMMatching.minWeightMatching(edges)
-    Checker.check(edges, a, b)
+    Checker.check(edges, a, b, sa, "matcher")
   }
 
-  test(4, 1, 500, 12)
-  //test(4, 1, 10, 7)
-  //test (4, 1, 10, 27)
-  //test(4, 1, 20, 9)
-
+  //test(100, 1, 10000, 1)
+  //test(200, 1, 10000, 2)
   var seed = 1
   val iterations = 1000
-
-  for (n <- 2 to 20 by 2;
+  for (n <- 2 to 20 by 2 ;
        t <- List(10, 20, 50, 100, 200, 500, 1000, 10000);
        i <- 1 to iterations) {
     test(n, 1, t, seed)
     seed += 1
   }
 
-  /*
-  test (2, 1, 10, 1)
-  test (4, 1, 5, 1)
-  test (6, 1, 10, 1)
-  */
+  for (n <- 20 to 200 by 10;
+       t <- List(10, 20, 50, 100, 200, 500, 1000, 10000))  {
+    test(n, 1, t, seed)
+    seed += 1
+  }
 
 }
