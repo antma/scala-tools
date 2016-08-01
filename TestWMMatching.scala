@@ -1,4 +1,3 @@
-//import WMMatching
 import scala.util.Random
 
 object PruneMatcher {
@@ -48,15 +47,8 @@ object Checker {
     }
   }
   def edgesRandomShuffle(edges: List[(Int, Int, Int)], r: Random): List[(Int, Int, Int)] = {
-    val a = edges.toArray
+    val a = r.shuffle(edges).toArray
     var n = a.length
-    while (n > 1) {
-      val i = r.nextInt (n)
-      val e = a(i)
-      a(i) = a(n-1)
-      a(n-1) = e
-      n -= 1
-    }
     for (i <- 0 until n) {
       if (r.nextBoolean()) {
         a(i) = (a(i)._2, a(i)._1, a(i)._3)
@@ -86,9 +78,23 @@ object TestWMMatching extends App {
     val b = WMMatching.minWeightMatching(edges)
     Checker.check(edges, a, b, sa, "matcher")
   }
+  def testZeroMatching(n: Int, seed: Int) {
+    printf("testZeroMatching(n: %d, seed: %d)\n", n, seed)
+    val r = new Random(seed)
+    val mate = Array.fill(n)(-1)
+    for (List(u,v) <- r.shuffle((0 until n).toList).grouped(2)) {
+      assert(mate(u) < 0 && mate(v) < 0)
+      mate(u) = v
+      mate(v) = u
+    }
+    val edges = (for (j <- 1 until n; i <- 0 to j) yield (i, j, if (mate(i) == j) 0 else 1 )).toList
+    val a = WMMatching.minWeightMatching (edges)
+    val ra = Checker.result(edges, a, 0)
+    assert(ra == 0)
+  }
 
-  //test(100, 1, 10000, 1)
-  //test(200, 1, 10000, 2)
+  //test(300, 1, 10000, 2)
+
   var seed = 1
   val iterations = 1000
   for (n <- 2 to 20 by 2 ;
@@ -102,6 +108,7 @@ object TestWMMatching extends App {
        t <- List(10, 20, 50, 100, 200, 500, 1000, 10000))  {
     test(n, 1, t, seed)
     seed += 1
+    testZeroMatching(n, seed)
+    seed += 1
   }
-
 }
