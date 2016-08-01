@@ -15,7 +15,7 @@ A C program for maximum weight matching by Ed Rothberg was used extensively
 to validate this new code.
 */
 
-import scala.collection.mutable.Queue
+//import scala.collection.mutable.Queue
 import scala.collection.mutable.Stack
 
 object WMMatching {
@@ -687,7 +687,12 @@ object WMMatching {
 
     var done = false
     // Main loop: continue until no further improvement is possible.
-    for (t <- 0 until nvertex) if (!done) {
+    def mainLoop(iterations: Int) : Unit = {
+      def stage() : Boolean = {
+        if (substage()) true
+        else if (!updateDual()) false
+        else stage()
+      }
       // Each iteration of this loop is a "stage".
       // A stage finds an augmenting path and uses that to improve
       // the matching.
@@ -712,25 +717,11 @@ object WMMatching {
         if (mate(v) == -1 && label(inblossom(v)) == 0)
           assignLabel(v, 1, -1)
       }
-
-      def stage() : Boolean = {
-        if (substage()) true
-        else if (!updateDual()) false
-        else stage()
-      }
-
-      if (stage()) {
-        // End of a stage; expand all S-blossoms which have dualvar = 0.
-        for (b <- nvertex until 2*nvertex) {
-          if (blossomparent(b) == -1 && blossombase(b) >= 0 &&
-               label(b) == 1 && dualvar(b) == 0) {
-            expandBlossom(b, true)
-          }
-        }
-      } else {
-        done = true;
+      if (stage() && iterations > 1) {
+        mainLoop(iterations - 1)
       }
     }
+    mainLoop(nvertex)
     // Transform mate such that mate(v) is the vertex to which v is paired.
     for (v <- 0 until nvertex if mate(v) >= 0) {
       mate(v) = endpoint(mate(v))
