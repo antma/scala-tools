@@ -50,7 +50,7 @@ object WMMatching {
     val nedge = edges.size
     val nvertex = 1 + edges.map ( x => x._1.max (x._2) ).max
     // Find the maximum edge weight.
-    val maxweight = edges.map ( x => x._3 ).max.max(0)
+    val maxweight = edges.map(_._3).max.max(0)
     // If p is an edge endpoint,
     // endpoint[p] is the vertex to which endpoint p is attached.
     val endpoint:Array[Int] = edges.map ( x => List(x._1, x._2) ).flatten.toArray
@@ -757,13 +757,8 @@ object WMMatching {
     mate
   }
   def minWeightMatching (edges: List[(Int, Int, Int)]) : Array[Int] = {
-    val (min_weight, max_weight) =
-      edges.foldLeft (Int.MaxValue, Int.MinValue) {
-        (b, a) => (b._1.min(a._3), b._2.max(a._3))
-      }
-    val delta_weight = max_weight - min_weight
-    //(min_weight, max_weight) -> (0, d)
-    maxWeightMatching (edges.map { x => (x._1, x._2, delta_weight - (x._3 - min_weight)) }, true)
+    val maxweight = edges.map(_._3).max
+    maxWeightMatching (edges.map { x => (x._1, x._2, maxweight - x._3) }, true)
   }
 }
 
