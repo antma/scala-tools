@@ -505,7 +505,7 @@ object WMMatching {
         val v = queue.pop()
         assert(label(inblossom(v)) == 1)
         def go (p: Int) : Boolean = {
-          val k = p / 2
+          val k = p >> 1
           val w = endpoint(p)
           // w is a neighbour to v
           if (inblossom(v) == inblossom(w)) {
@@ -735,4 +735,8 @@ object WMMatching {
     val maxweight = edges.map(_._3).max
     maxWeightMatching (edges.map { x => (x._1, x._2, maxweight - x._3) }, true)
   }
+  def fullGraph(nvertex: Int, pairScore : (Int, Int) => Int) : List[(Int, Int, Int)] =
+    (for (j <- 1 until nvertex; i <- 0 until j) yield (i, j, pairScore(i, j))).toList
+  def mateToEdges(mate: Array[Int]) : List[(Int, Int)] =
+    (for (i <- 0 until mate.size; if (i < mate(i))) yield (i, mate(i))).toList
 }

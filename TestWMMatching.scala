@@ -71,7 +71,7 @@ object TestWMMatching extends App {
   def test(n: Int, min_weight: Int, max_weight: Int, seed: Int) {
     printf("test(n: %d, min_weight: %d, max_weight: %d, seed: %d)\n", n, min_weight, max_weight, seed)
     val r = new Random(seed)
-    val edges = (for (j <- 1 until n; i <- 0 until j) yield (i, j, r.nextInt(max_weight-min_weight)+min_weight)).toList
+    val edges = WMMatching.fullGraph(n, (i, j) => r.nextInt(max_weight-min_weight)+min_weight)
     //println (edges)
     val (sa, a) =
       if (n <= 20) ("prune", PruneMatcher.minWeightMatching(edges))
@@ -88,7 +88,7 @@ object TestWMMatching extends App {
       mate(u) = v
       mate(v) = u
     }
-    val edges = (for (j <- 1 until n; i <- 0 to j) yield (i, j, if (mate(i) == j) 0 else 1 )).toList
+    val edges = WMMatching.fullGraph(n, ((i,j) => if (mate(i) == j) 0 else 1))
     val a = WMMatching.minWeightMatching (edges)
     val ra = Checker.result(edges, a, 0)
     assert(ra == 0)
