@@ -53,11 +53,11 @@ object WMMatching {
     val maxweight = edges.map(_._3).max.max(0)
     // If p is an edge endpoint,
     // endpoint(p) is the vertex to which endpoint p is attached.
-    val endpoint:Array[Int] = edges.map ( x => List(x._1, x._2) ).flatten.toArray
+    val endpoint:Array[Int] = edges_a.flatMap ( x => List(x._1, x._2))
     //If v is a vertex,
     //neighbend(v) is the list of remote endpoints of the edges attached to v.
     val neighbend:Array[List[Int]] = Array.fill(nvertex)(Nil)
-    edges.zipWithIndex.reverse.foreach { case ((i, j, w), k) => neighbend(i) = (2 * k + 1) :: neighbend(i); neighbend(j) = (2 * k) :: neighbend(j) }
+    edges_a.zipWithIndex.reverseIterator.foreach { case ((i, j, w), k) => neighbend(i) ::= (2 * k + 1); neighbend(j) ::= (2 * k) }
 
     // If v is a vertex,
     // mate(v) is the remote endpoint of its matched edge, or -1 if it is single
@@ -289,9 +289,10 @@ object WMMatching {
 
       val bestedgeto = Array.fill(2 * nvertex)(-1)
       for (bv <- blossomchilds(b)) {
-        val nblists = if (blossombestedges(bv) == null) blossomLeaves(bv).map(v => neighbend(v).map { p =>  p >> 1 } )
-                      else List(blossombestedges(bv))
-        for (nblist <- nblists; k <- nblist) {
+        val nblists:Traversable[Int] =
+          if (blossombestedges(bv) == null) blossomLeaves(bv).view.flatMap(v => neighbend(v).map { p =>  p >> 1 } )
+          else blossombestedges(bv)
+        for (k <- nblists) {
           val e = edges_a(k)
           val (i, j) = if (inblossom(e._2) == b) (e._2, e._1) else (e._1, e._2)
           val bj = inblossom(j)
@@ -301,7 +302,7 @@ object WMMatching {
         blossombestedges(bv) = null
         bestedge(bv) = -1
       }
-      blossombestedges(b) = bestedgeto.toList.filter { k => k != -1 }
+      blossombestedges(b) = bestedgeto.view.filter { k => k != -1 } . toList
       // Select bestedge(b).
       bestedge(b) = -1
       for (k <- blossombestedges(b)) {
@@ -353,7 +354,7 @@ object WMMatching {
           j = jstep (j)
           p = blossomendps(b)(j-endptrick) ^ endptrick
           // Step to the next T-sub-blossom.
-          allowedge(p/2) = false
+          allowedge(p >> 1) = false
           j = jstep (j)
         }
         // Relabel the base T-sub-blossom WITHOUT stepping through to
@@ -375,16 +376,14 @@ object WMMatching {
             // This sub-blossom just got label S through one of its
             // neighbours; leave it.
           } else {
-            (blossomLeaves(bv).find(x => label(x) != 0)) match {
-              case Some(v) => {
+            (blossomLeaves(bv).find(x => label(x) != 0)).foreach ( v => {
                 assert(label(v) == 2)
                 assert(inblossom(v) == bv)
                 label(v) = 0
                 label(endpoint(mate(blossombase(bv)))) = 0
                 assignLabel(v, 2, labelend(v))
               }
-              case None => ()
-            }
+            )
           }
           j = jstep (j)
         }
@@ -409,7 +408,7 @@ object WMMatching {
       def rotate(a: Array[Int], shift:Int): Array[Int] = {
         if (shift == 0) a
         else {
-          val n = a.size
+          val n = a.length
           val b: Array[Int] = new Array(n)
           Array.copy(a, shift, b, 0, n - shift)
           Array.copy(a, 0, b, n - shift, shift)
@@ -738,5 +737,5 @@ object WMMatching {
   def fullGraph(nvertex: Int, pairScore : (Int, Int) => Int) : List[(Int, Int, Int)] =
     (for (j <- 1 until nvertex; i <- 0 until j) yield (i, j, pairScore(i, j))).toList
   def mateToEdges(mate: Array[Int]) : List[(Int, Int)] =
-    (for (i <- 0 until mate.size; if (i < mate(i))) yield (i, mate(i))).toList
+    (for (i <- 0 until mate.length; if (i < mate(i))) yield (i, mate(i))).toList
 }
