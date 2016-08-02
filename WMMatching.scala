@@ -262,12 +262,12 @@ object WMMatching {
           traceBack(endpoint(labelend(bv)), d, bv :: path, (labelend(bv) ^ d) :: endps)
         }
       }
-      // Trace back from v to base.
-      val (path1, endps1) = traceBack(v, 0, Nil, List(2*k))
       // Trace back from w to base.
       val (path2, endps2) = traceBack(w, 1, Nil, Nil)
-      blossomchilds(b) = (bb :: path1 ::: (path2.reverse)).toArray
-      blossomendps(b) = (endps1 ::: (endps2.reverse)).toArray
+      // Trace back from v to base.
+      val (path1, endps1) = traceBack(v, 0, path2.reverse, (2*k) :: (endps2.reverse))
+      blossomchilds(b) = (bb :: path1).toArray
+      blossomendps(b) = endps1.toArray
 
       // Set label to S.
       assert(label(bb) == 1)
