@@ -19,7 +19,7 @@ to validate this new code.
 import scala.collection.mutable.Stack
 
 object WMMatching {
-  def maxWeightMatching (edges: List[(Int, Int, Int)], maxcardinality: Boolean) : Array[Int] = {
+  def maxWeightMatching (edges: Array[(Int, Int, Int)], maxcardinality: Boolean) : Array[Int] = {
     /*
     Compute a maximum-weighted matching in the general undirected
     weighted graph given by "edges".  If "maxcardinality" is true,
@@ -46,18 +46,17 @@ object WMMatching {
     the paper by Galil; read the paper before reading this code.
 
     */
-    val edges_a: Array[(Int, Int, Int)] = edges.toArray
-    val nedge = edges_a.length
-    val nvertex = 1 + edges.map ( x => x._1.max (x._2) ).max
+    val nedge = edges.length
+    val nvertex = 1 + edges.view.map ( x => x._1.max (x._2) ).max
     // Find the maximum edge weight.
-    val maxweight = edges.map(_._3).max.max(0)
+    val maxweight = edges.view.map(_._3).max.max(0)
     // If p is an edge endpoint,
     // endpoint(p) is the vertex to which endpoint p is attached.
-    val endpoint:Array[Int] = edges_a.flatMap ( x => List(x._1, x._2))
+    val endpoint:Array[Int] = edges.flatMap ( x => List(x._1, x._2))
     //If v is a vertex,
     //neighbend(v) is the list of remote endpoints of the edges attached to v.
     val neighbend:Array[List[Int]] = Array.fill(nvertex)(Nil)
-    edges_a.zipWithIndex.reverseIterator.foreach { case ((i, j, w), k) => neighbend(i) ::= (2 * k + 1); neighbend(j) ::= (2 * k) }
+    edges.zipWithIndex.reverseIterator.foreach { case ((i, j, w), k) => neighbend(i) ::= (2 * k + 1); neighbend(j) ::= (2 * k) }
 
     // If v is a vertex,
     // mate(v) is the remote endpoint of its matched edge, or -1 if it is single
@@ -160,7 +159,7 @@ object WMMatching {
     val queue = new Stack[Int]()
     // Return 2 * slack of edge k (does not work inside blossoms).
     def slack(k: Int) = {
-      dualvar(edges_a(k)._1) + dualvar(edges_a(k)._2) - 2 * edges_a(k)._3
+      dualvar(edges(k)._1) + dualvar(edges(k)._2) - 2 * edges(k)._3
     }
 
     // Generate the leaf vertices of a blossom.
@@ -238,7 +237,7 @@ object WMMatching {
     variable to zero; relabel its T-vertices to S and add them to the queue.
     */
     def addBlossom(base: Int, k: Int) = {
-      val (v, w, wt) = edges_a(k)
+      val (v, w, wt) = edges(k)
       val bb = inblossom(base)
       // Create blossom.
       //val b = unusedblossoms.dequeue()
@@ -293,7 +292,7 @@ object WMMatching {
           if (blossombestedges(bv) == null) blossomLeaves(bv).view.flatMap(v => neighbend(v).map { p =>  p >> 1 } )
           else blossombestedges(bv)
         for (k <- nblists) {
-          val e = edges_a(k)
+          val e = edges(k)
           val (i, j) = if (inblossom(e._2) == b) (e._2, e._1) else (e._1, e._2)
           val bj = inblossom(j)
           if (bj != b && label(bj) == 1 && (bestedgeto(bj) == -1 || slack(k) < slack(bestedgeto(bj)))) bestedgeto(bj) = k
@@ -457,7 +456,7 @@ object WMMatching {
     // single vertices. The augmenting path runs through edge k, which
     // connects a pair of S vertices.
     def augmentMatching(k: Int) : Unit = {
-      val (v, w, wt) = edges_a(k)
+      val (v, w, wt) = edges(k)
       // Match vertex s to remote endpoint p. Then trace back from s
       // until we find a single vertex, swapping matched and unmatched
       // edges as we go.
@@ -666,7 +665,7 @@ object WMMatching {
       } else if (dt.tp == 2) {
         // Use the least-slack edge to continue the search.
         allowedge(dt.extra) = true
-        val (ei, ej, wt) = edges_a(dt.extra)
+        val (ei, ej, wt) = edges(dt.extra)
         val (i, j) = if (label(inblossom(ei)) == 0) (ej, ei) else (ei, ej)
         assert(label(inblossom(i)) == 1)
         //queue.enqueue(i)
@@ -674,7 +673,7 @@ object WMMatching {
       } else if (dt.tp == 3) {
          // Use the least-slack edge to continue the search.
          allowedge(dt.extra) = true
-         val (i, j, wt) = edges_a(dt.extra)
+         val (i, j, wt) = edges(dt.extra)
          assert(label(inblossom(i)) == 1)
          //queue.enqueue(i)
          queue.push(i)
@@ -730,12 +729,12 @@ object WMMatching {
     }
     mate
   }
-  def minWeightMatching (edges: List[(Int, Int, Int)]) : Array[Int] = {
+  def minWeightMatching (edges: Array[(Int, Int, Int)]) : Array[Int] = {
     val maxweight = edges.map(_._3).max
     maxWeightMatching (edges.map { x => (x._1, x._2, maxweight - x._3) }, true)
   }
-  def fullGraph(nvertex: Int, pairScore : (Int, Int) => Int) : List[(Int, Int, Int)] =
-    (for (j <- 1 until nvertex; i <- 0 until j) yield (i, j, pairScore(i, j))).toList
+  def fullGraph(nvertex: Int, pairScore : (Int, Int) => Int) : Array[(Int, Int, Int)] =
+    (for (j <- 1 until nvertex; i <- 0 until j) yield (i, j, pairScore(i, j))).toArray
   def mateToEdges(mate: Array[Int]) : List[(Int, Int)] =
     (for (i <- 0 until mate.length; if (i < mate(i))) yield (i, mate(i))).toList
 }
