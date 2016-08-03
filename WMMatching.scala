@@ -615,7 +615,7 @@ object WMMatching {
 
       // Compute delta3: half the minimum slack on any edge between
       // a pair of S-blossoms.
-      for (b <- 0 until 2 * nvertex) {
+      for (b <- 0 until m) {
         if (blossomparent(b) == -1 && label(b) == 1 && bestedge(b) != -1) {
           val kslack = slack(bestedge(b))
           assert((kslack % 2) == 0)
@@ -624,7 +624,7 @@ object WMMatching {
       }
 
       // Compute delta4: minimum z variable of any T-blossom.
-      for (b <- nvertex until 2 * nvertex) {
+      for (b <- nvertex until m) {
         if (blossombase(b) >= 0 && blossomparent(b) == -1 && label(b) == 2) {
           dt.update (4, dualvar(b), b)
         }
@@ -649,7 +649,7 @@ object WMMatching {
         }
       }
 
-      for (b <- nvertex until 2 * nvertex) {
+      for (b <- nvertex until m) {
         if (blossombase(b) >= 0 && blossomparent(b) == -1) {
           if (label(b) == 1)
             dualvar(b) += dt.delta
@@ -698,7 +698,7 @@ object WMMatching {
 
       // Forget all about least-slack edges.
       bestedge = Array.fill(2 * nvertex)(-1)
-      for (k <- nvertex until 2*nvertex) {
+      for (k <- nvertex until m) {
         blossombestedges(k) = null
       }
       // Loss of labeling means that we can not be sure that currently
