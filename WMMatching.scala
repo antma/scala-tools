@@ -203,11 +203,11 @@ object WMMatching {
         else {
           // Look for a breadcrumb in v's blossom or put a new breadcrumb.
           val b = inblossom(v)
-          if ((label(b) & 4) != 0) (blossombase(b), path)
+          if (label(b) == 3) (blossombase(b), path)
           else {
             assert(label(b) == 1)
             val path2 = b :: path
-            label(b) = 5
+            label(b) = 3
             // Trace one step back.
             assert(labelend(b) == mate(blossombase(b)))
             val nv =
