@@ -15,7 +15,6 @@ A C program for maximum weight matching by Ed Rothberg was used extensively
 to validate this new code.
 */
 
-//import scala.collection.mutable.Queue
 import scala.collection.mutable.Stack
 
 object WMMatching {
@@ -137,10 +136,9 @@ object WMMatching {
     val blossombestedges: Array[List[Int]] = new Array(2 * nvertex)
 
     // List of currently unused blossom numbers.
-    //val unusedblossoms = new Queue[Int]()
-    //unusedblossoms  ++= List.range(nvertex, 2 * nvertex)
     val unusedblossoms = new Stack[Int]()
-    for (v <- nvertex until (2 * nvertex)) unusedblossoms.push(v)
+    for (v <- (2 * nvertex) to nvertex by -1) unusedblossoms.push(v)
+    var m = nvertex
 
     // If v is a vertex,
     // dualvar(v) = 2 * u(v) where u(v) is the v's variable in the dual
@@ -183,7 +181,6 @@ object WMMatching {
       bestedge(b) = -1
       if (t == 1) {
         //b became an S-vertex/blossom; add it(s vertices) to the queue.
-        //queue ++= blossomLeaves(b)
         for (o <- blossomLeaves(b)) queue.push(o)
       } else if (t == 2) {
         // b became a T-vertex/blossom; assign label S to its mate.
@@ -240,8 +237,10 @@ object WMMatching {
       val (v, w, wt) = edges(k)
       val bb = inblossom(base)
       // Create blossom.
-      //val b = unusedblossoms.dequeue()
       val b = unusedblossoms.pop()
+      if (b >= m) {
+        m = b + 1
+      }
 
       blossombase(b) = base
       blossomparent(b) = -1
@@ -279,14 +278,13 @@ object WMMatching {
         if (label(inblossom(v)) == 2) {
           // This T-vertex now turns into an S-vertex because it becomes
           // part of an S-blossom; add it to the queue.
-          //queue.enqueue(v)
           queue.push(v)
         }
         inblossom(v) = b
       }
       // Compute blossombestedges(b).
 
-      val bestedgeto = Array.fill(2 * nvertex)(-1)
+      val bestedgeto = Array.fill(m)(-1)
       for (bv <- blossomchilds(b)) {
         val nblists:Traversable[Int] =
           if (blossombestedges(bv) == null) blossomLeaves(bv).view.flatMap(v => neighbend(v).map { p =>  p >> 1 } )
@@ -395,8 +393,10 @@ object WMMatching {
       blossombase(b) = -1
       blossombestedges(b) = null
       bestedge(b) = -1
-      //unusedblossoms.enqueue(b)
       unusedblossoms.push(b)
+      if (b + 1 == m) {
+        m = m - 1
+      }
     }
 
     // Swap matched/unmatched edges over an alternating path through blossom b
@@ -499,7 +499,6 @@ object WMMatching {
       if (queue.isEmpty) false
       else {
         // Take an S vertex from the queue.
-        //val v = queue.dequeue()
         val v = queue.pop()
         assert(label(inblossom(v)) == 1)
         def go (p: Int) : Boolean = {
@@ -675,7 +674,6 @@ object WMMatching {
          allowedge(dt.extra) = true
          val (i, j, wt) = edges(dt.extra)
          assert(label(inblossom(i)) == 1)
-         //queue.enqueue(i)
          queue.push(i)
       } else if (dt.tp == 4) {
         expandBlossom(dt.extra, false)
