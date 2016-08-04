@@ -40,14 +40,14 @@ object PruneMatching {
 }
 
 class TestSettings(args: Array[String]) {
-  var benchmark = 0
+  var benchmark = false
   var verbose = false
   var help = false
   var iterations = 100
   var stress = true
   var maxprune = 26
   val parse: List[String] => Boolean = {
-    case "-b" :: xs => { benchmark = 1; parse(xs) }
+    case "-b" :: xs => { benchmark = true; parse(xs) }
     case "-v" :: xs => { verbose = true; parse(xs) }
     case "-h" :: xs => { help = true; parse(xs) }
     case "-n" :: s :: xs => { iterations = s.toInt; parse(xs); }
@@ -78,12 +78,14 @@ object TestWMMatching extends App {
     a
   }
   def check(edges: Array[(Int, Int, Int)], a: (Array[Int], Long, String), b: (Array[Int], Long, String)) = {
-    assert (a._1.length == b._1.length)
-    val ra = result(edges, a._1, 0)
-    printf ("%s solution %d (%d ms) %s\n", a._3, ra, a._2, if (st.verbose) ", " + a._1.toList.toString else "")
     val rb = result(edges, b._1, 0)
     printf ("%s solution %d (%d ms) %s\n", b._3, rb, b._2, if (st.verbose) ", " + b._1.toList.toString else "")
-    assert(ra == rb)
+    if (a._1 != null) {
+      assert (a._1.length == b._1.length)
+      val ra = result(edges, a._1, 0)
+      printf ("%s solution %d (%d ms) %s\n", a._3, ra, a._2, if (st.verbose) ", " + a._1.toList.toString else "")
+      assert(ra == rb)
+    }
   }
 
   def nowMillis: Long = System.currentTimeMillis()
@@ -113,7 +115,8 @@ object TestWMMatching extends App {
     val edges: Array[(Int, Int, Int)] = WMMatching.fullGraph(n, (i, j) => r.nextInt(max_weight-min_weight)+min_weight)
     //println (edges)
     val a =
-      if (n <= st.maxprune) pruneMinWeightMatching(edges)
+      if (st.benchmark) (null, 0L, "skip")
+      else if (n <= st.maxprune) pruneMinWeightMatching(edges)
       else shuffleMinWeightMatching(edges, r)
     val b = matcherMinWeightMatching(edges)
     check(edges, a, b)
@@ -172,7 +175,7 @@ object TestWMMatching extends App {
   }
 
   if (st.help) {
-  } else if (st.benchmark > 0) {
+  } else if (st.benchmark) {
     test(st.iterations, 1, 10000, 2)
   } else {
     handTests()
