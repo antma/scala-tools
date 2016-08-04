@@ -138,7 +138,7 @@ object WMMatching {
     // List of currently unused blossom numbers.
     val unusedblossoms = new Stack[Int]()
     for (v <- (2 * nvertex) to nvertex by -1) unusedblossoms.push(v)
-    var m = nvertex
+    var allocatedvertex = nvertex
 
     // If v is a vertex,
     // dualvar(v) = 2 * u(v) where u(v) is the v's variable in the dual
@@ -161,9 +161,16 @@ object WMMatching {
     }
 
     // Generate the leaf vertices of a blossom.
-    def blossomLeaves(b: Int): List[Int] = {
-      if (b < nvertex) List(b)
-      else blossomchilds(b).toList.flatMap(blossomLeaves)
+    def blossomLeaves(b: Int): Traversable[Int] = {
+      class BlossomLeavesTraversable(b:Int) extends Traversable[Int] {
+        def foreach[U](f: Int => U): Unit = {
+          def g(v: Int): Unit = {
+            blossomchilds(v).foreach(w => if (w < nvertex) f(w) else g(w))
+          }
+          if (b < nvertex) f(b) else g(b)
+        }
+      }
+      new BlossomLeavesTraversable(b)
     }
 
     // Assign label t to the top-level blossom containing vertex w
@@ -181,7 +188,7 @@ object WMMatching {
       bestedge(b) = -1
       if (t == 1) {
         //b became an S-vertex/blossom; add it(s vertices) to the queue.
-        for (o <- blossomLeaves(b)) queue.push(o)
+        blossomLeaves(b).foreach { queue.push(_) }
       } else if (t == 2) {
         // b became a T-vertex/blossom; assign label S to its mate.
         // (If b is a non-trivial blossom, its base is the only vertex
@@ -238,8 +245,8 @@ object WMMatching {
       val bb = inblossom(base)
       // Create blossom.
       val b = unusedblossoms.pop()
-      if (b >= m) {
-        m = b + 1
+      if (allocatedvertex <= b) {
+        allocatedvertex = b + 1
       }
 
       blossombase(b) = base
@@ -284,10 +291,10 @@ object WMMatching {
       }
       // Compute blossombestedges(b).
 
-      val bestedgeto = Array.fill(m)(-1)
+      val bestedgeto = Array.fill(allocatedvertex)(-1)
       for (bv <- blossomchilds(b)) {
         val nblists:Traversable[Int] =
-          if (blossombestedges(bv) == null) blossomLeaves(bv).view.flatMap(v => neighbend(v).map { p =>  p >> 1 } )
+          if (blossombestedges(bv) == null) blossomLeaves(bv).flatMap(v => neighbend(v).view.map { p =>  p >> 1 } )
           else blossombestedges(bv)
         for (k <- nblists) {
           val e = edges(k)
@@ -394,8 +401,8 @@ object WMMatching {
       blossombestedges(b) = null
       bestedge(b) = -1
       unusedblossoms.push(b)
-      if (b + 1 == m) {
-        m = m - 1
+      if (b + 1 == allocatedvertex) {
+        allocatedvertex -= 1
       }
     }
 
@@ -615,7 +622,7 @@ object WMMatching {
 
       // Compute delta3: half the minimum slack on any edge between
       // a pair of S-blossoms.
-      for (b <- 0 until m) {
+      for (b <- 0 until allocatedvertex) {
         if (blossomparent(b) == -1 && label(b) == 1 && bestedge(b) != -1) {
           val kslack = slack(bestedge(b))
           assert((kslack % 2) == 0)
@@ -624,7 +631,7 @@ object WMMatching {
       }
 
       // Compute delta4: minimum z variable of any T-blossom.
-      for (b <- nvertex until m) {
+      for (b <- nvertex until allocatedvertex) {
         if (blossombase(b) >= 0 && blossomparent(b) == -1 && label(b) == 2) {
           dt.update (4, dualvar(b), b)
         }
@@ -649,7 +656,7 @@ object WMMatching {
         }
       }
 
-      for (b <- nvertex until m) {
+      for (b <- nvertex until allocatedvertex) {
         if (blossombase(b) >= 0 && blossomparent(b) == -1) {
           if (label(b) == 1)
             dualvar(b) += dt.delta
@@ -698,7 +705,7 @@ object WMMatching {
 
       // Forget all about least-slack edges.
       bestedge = Array.fill(2 * nvertex)(-1)
-      for (k <- nvertex until m) {
+      for (k <- nvertex until allocatedvertex) {
         blossombestedges(k) = null
       }
       // Loss of labeling means that we can not be sure that currently
