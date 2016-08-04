@@ -1,6 +1,6 @@
 import scala.util.Random
 
-object PruneMatcher {
+object PruneMatching {
   type Score = Int
   type RankedPlayer = Int
   type WeightedPairing = (RankedPlayer, RankedPlayer, Int)
@@ -44,15 +44,19 @@ class TestSettings(args: Array[String]) {
   var verbose = false
   var help = false
   var iterations = 100
+  var stress = true
+  var maxprune = 26
   val parse: List[String] => Boolean = {
     case "-b" :: xs => { benchmark = 1; parse(xs) }
     case "-v" :: xs => { verbose = true; parse(xs) }
     case "-h" :: xs => { help = true; parse(xs) }
     case "-n" :: s :: xs => { iterations = s.toInt; parse(xs); }
+    case "--no-stress" :: xs => { stress = false; parse(xs); }
     case Nil => true
     case _ => false
   }
   if (!parse(args.toList)) {
+    printf("Can't parse command line arguments");
     help = true
   }
 }
@@ -73,24 +77,46 @@ object TestWMMatching extends App {
     }
     a
   }
-  def check(edges: Array[(Int, Int, Int)], a: Array[Int], b: Array[Int], sa: String, sb: String ) = {
-    assert (a.length == b.length)
-    val ra = result(edges, a, 0)
-    printf ("%s solution %d%s\n", sa, ra, if (st.verbose) ", " + a.toList.toString else "")
-    val rb = result(edges, b, 0)
-    printf ("%s solution %d%s\n", sb, rb, if (st.verbose) ", " + b.toList.toString else "")
+  def check(edges: Array[(Int, Int, Int)], a: (Array[Int], Long, String), b: (Array[Int], Long, String)) = {
+    assert (a._1.length == b._1.length)
+    val ra = result(edges, a._1, 0)
+    printf ("%s solution %d (%d ms) %s\n", a._3, ra, a._2, if (st.verbose) ", " + a._1.toList.toString else "")
+    val rb = result(edges, b._1, 0)
+    printf ("%s solution %d (%d ms) %s\n", b._3, rb, b._2, if (st.verbose) ", " + b._1.toList.toString else "")
     assert(ra == rb)
   }
+
+  def nowMillis: Long = System.currentTimeMillis()
+  def pruneMinWeightMatching(edges:Array[(Int, Int, Int)]) = {
+    val start = nowMillis
+    val a:Array[Int] = PruneMatching.minWeightMatching(edges.toList)
+    val t = nowMillis - start
+    (a, t, "prune")
+  }
+  def shuffleMinWeightMatching(edges:Array[(Int, Int, Int)], r: Random) = {
+    val edges2 = edgesRandomShuffle(edges, r)
+    val start = nowMillis
+    val a = WMMatching.minWeightMatching(edges2)
+    val t = nowMillis - start
+    (a, t, "shuffle")
+  }
+  def matcherMinWeightMatching(edges:Array[(Int, Int, Int)]) = {
+    val start = nowMillis
+    val a = WMMatching.minWeightMatching(edges)
+    val t = nowMillis - start
+    (a, t, "matcher")
+  }
+
   def test(n: Int, min_weight: Int, max_weight: Int, seed: Int) {
     printf("test(n: %d, min_weight: %d, max_weight: %d, seed: %d)\n", n, min_weight, max_weight, seed)
     val r = new Random(seed)
     val edges: Array[(Int, Int, Int)] = WMMatching.fullGraph(n, (i, j) => r.nextInt(max_weight-min_weight)+min_weight)
     //println (edges)
-    val (sa, a) =
-      if (n <= 20) ("prune", PruneMatcher.minWeightMatching(edges.toList))
-      else ("shuffle", WMMatching.minWeightMatching(edgesRandomShuffle(edges, r)))
-    val b = WMMatching.minWeightMatching(edges)
-    check(edges, a, b, sa, "matcher")
+    val a =
+      if (n <= st.maxprune) pruneMinWeightMatching(edges)
+      else shuffleMinWeightMatching(edges, r)
+    val b = matcherMinWeightMatching(edges)
+    check(edges, a, b)
   }
   def testZeroMatching(n: Int, seed: Int) {
     printf("testZeroMatching(n: %d, seed: %d)\n", n, seed)
@@ -151,19 +177,20 @@ object TestWMMatching extends App {
   } else {
     handTests()
     var seed = 1
-    for (n <- 2 to 20 by 2 ;
+    for (n <- 2 to st.maxprune by 2 ;
          t <- List(10, 20, 50, 100, 200, 500, 1000, 10000);
          i <- 1 to st.iterations) {
       test(n, 1, t, seed)
       seed += 1
     }
-
-    for (n <- 20 to 200 by 10;
-         t <- List(10, 20, 50, 100, 200, 500, 1000, 10000))  {
-      test(n, 1, t, seed)
-      seed += 1
-      testZeroMatching(n, seed)
-      seed += 1
+    if (st.stress) {
+      for (n <- 30 to 500 by 10;
+           t <- List(10, 20, 50, 100, 200, 500, 1000, 10000))  {
+        test(n, 1, t, seed)
+        seed += 1
+        testZeroMatching(n, seed)
+        seed += 1
+      }
     }
   }
 }
