@@ -15,8 +15,6 @@ A C program for maximum weight matching by Ed Rothberg was used extensively
 to validate this new code.
 */
 
-import scala.collection.mutable.Stack
-
 object WMMatching {
   def maxWeightMatching (edges: Array[(Int, Int, Int)], maxcardinality: Boolean) : Array[Int] = {
     /*
@@ -136,8 +134,7 @@ object WMMatching {
     val blossombestedges: Array[List[Int]] = new Array(2 * nvertex)
 
     // List of currently unused blossom numbers.
-    val unusedblossoms = new Stack[Int]()
-    for (v <- (2 * nvertex) to nvertex by -1) unusedblossoms.push(v)
+    var unusedblossoms = List.range(nvertex, 2 * nvertex)
     var allocatedvertex = nvertex
 
     // If v is a vertex,
@@ -154,7 +151,7 @@ object WMMatching {
     // be zero.
 
     var allowedge: Array[Boolean] = Array.fill(nedge)(false)
-    val queue = new Stack[Int]()
+    var queue: List[Int] = Nil
     // Return 2 * slack of edge k (does not work inside blossoms).
     def slack(k: Int) = {
       dualvar(edges(k)._1) + dualvar(edges(k)._2) - 2 * edges(k)._3
@@ -188,7 +185,7 @@ object WMMatching {
       bestedge(b) = -1
       if (t == 1) {
         //b became an S-vertex/blossom; add it(s vertices) to the queue.
-        blossomLeaves(b).foreach { queue.push(_) }
+        blossomLeaves(b).foreach ( queue ::= _ )
       } else if (t == 2) {
         // b became a T-vertex/blossom; assign label S to its mate.
         // (If b is a non-trivial blossom, its base is the only vertex
@@ -244,7 +241,8 @@ object WMMatching {
       val (v, w, wt) = edges(k)
       val bb = inblossom(base)
       // Create blossom.
-      val b = unusedblossoms.pop()
+      val b = unusedblossoms.head
+      unusedblossoms = unusedblossoms.tail
       if (allocatedvertex <= b) {
         allocatedvertex = b + 1
       }
@@ -285,7 +283,7 @@ object WMMatching {
         if (label(inblossom(v)) == 2) {
           // This T-vertex now turns into an S-vertex because it becomes
           // part of an S-blossom; add it to the queue.
-          queue.push(v)
+          queue ::= v
         }
         inblossom(v) = b
       }
@@ -400,7 +398,7 @@ object WMMatching {
       blossombase(b) = -1
       blossombestedges(b) = null
       bestedge(b) = -1
-      unusedblossoms.push(b)
+      unusedblossoms ::= b
       if (b + 1 == allocatedvertex) {
         allocatedvertex -= 1
       }
@@ -506,7 +504,8 @@ object WMMatching {
       if (queue.isEmpty) false
       else {
         // Take an S vertex from the queue.
-        val v = queue.pop()
+        val v = queue.head
+        queue = queue.tail
         assert(label(inblossom(v)) == 1)
         def go (p: Int) : Boolean = {
           val k = p >> 1
@@ -674,14 +673,13 @@ object WMMatching {
         val (ei, ej, wt) = edges(dt.extra)
         val (i, j) = if (label(inblossom(ei)) == 0) (ej, ei) else (ei, ej)
         assert(label(inblossom(i)) == 1)
-        //queue.enqueue(i)
-        queue.push(i)
+        queue ::= i
       } else if (dt.tp == 3) {
          // Use the least-slack edge to continue the search.
          allowedge(dt.extra) = true
          val (i, j, wt) = edges(dt.extra)
          assert(label(inblossom(i)) == 1)
-         queue.push(i)
+         queue ::= i
       } else if (dt.tp == 4) {
         expandBlossom(dt.extra, false)
       }
@@ -713,7 +711,7 @@ object WMMatching {
       allowedge = Array.fill(nedge)(false)
 
       // Make queue empty.
-      queue.clear()
+      queue = Nil
 
       // Label single blossoms/vertices with S and put them in the queue.
       for (v <- 0 until nvertex) {
