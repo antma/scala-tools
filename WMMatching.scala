@@ -150,7 +150,7 @@ object WMMatching {
     // problem; if allowedge(k) is false, the edge's slack may or may not
     // be zero.
 
-    var allowedge: Array[Boolean] = Array.fill(nedge)(false)
+    var allowedge: Array[Boolean] = null
     var queue: List[Int] = Nil
     // Return 2 * slack of edge k (does not work inside blossoms).
     def slack(k: Int) = {
