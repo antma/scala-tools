@@ -699,10 +699,10 @@ object WMMatching {
       // the matching.
 
       // Remove labels from top-level blossoms/vertices.
-      label = Array.fill(2 * nvertex)(0)
+      java.util.Arrays.fill(label, 0, allocatedvertex, 0)
 
       // Forget all about least-slack edges.
-      bestedge = Array.fill(2 * nvertex)(-1)
+      java.util.Arrays.fill(bestedge, 0, allocatedvertex, -1)
       for (k <- nvertex until allocatedvertex) {
         blossombestedges(k) = null
       }
