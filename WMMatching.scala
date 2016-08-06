@@ -352,7 +352,7 @@ object WMMatching {
           label(endpoint(blossomendps(b)(j-endptrick)^endptrick^1)) = 0
           assignLabel(endpoint(p ^ 1), 2, p)
           //Step to the next S-sub-blossom and note its forward endpoint.
-          allowedge(blossomendps(b)(j-endptrick)/2) = true
+          allowedge(blossomendps(b)(j-endptrick) >> 1) = true
           j = jstep (j)
           p = blossomendps(b)(j-endptrick) ^ endptrick
           // Step to the next T-sub-blossom.
@@ -568,7 +568,7 @@ object WMMatching {
               // w is a free vertex (or an unreached vertex inside
               // a T-blossom) but we can not reach it yet;
               // keep track of the least-slack edge that reaches w.
-              if (bestedge(w) == -1 ||  kslack < slack(bestedge(w))) {
+              if (bestedge(w) == -1 || kslack < slack(bestedge(w))) {
                 bestedge(w) = k
               }
               false
@@ -686,7 +686,6 @@ object WMMatching {
       dt.tp > 1
     }
 
-    var done = false
     // Main loop: continue until no further improvement is possible.
     def mainLoop(iterations: Int) : Unit = {
       def stage() : Boolean = {
