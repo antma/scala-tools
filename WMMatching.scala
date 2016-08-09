@@ -339,11 +339,11 @@ object WMMatching {
         // Decide in which direction we will go round the blossom.
         var j = blossomchilds(b).indexOf(entrychild)
         val l1 = blossomchilds(b).length - 1
-        // Start index is odd; go forward and wrap.
-        // Start index is even; go backward.
         val (jstep, endptrick) =
-          if ((j & 1) != 0) ( (j:Int) => { if (j == l1) 0 else (j + 1) }, 0)
-          else ((j:Int) => { if (j == 0) l1 else (j - 1) }  , 1)
+          // Start index is odd; go forward and wrap.
+          if ((j & 1) != 0) ((j: Int) => { if (j == l1) 0 else (j + 1) }, 0)
+          // Start index is even; go backward.
+          else ((j: Int) => { if (j == 0) l1 else (j - 1) }, 1)
         // Move along the blossom until we get to the base.
         var p = labelend(b)
         while (j != 0) {
