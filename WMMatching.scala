@@ -15,6 +15,8 @@ A C program for maximum weight matching by Ed Rothberg was used extensively
 to validate this new code.
 */
 
+import scala.annotation.tailrec
+
 object WMMatching {
   def maxWeightMatching (edges: Array[(Int, Int, Int)], maxcardinality: Boolean) : Array[Int] = {
     /*
@@ -174,7 +176,7 @@ object WMMatching {
     // and record the fact that w was reached through the edge with
     // remote endpoint p.
 
-    def assignLabel(w:Int, t:Int, p:Int) : Unit = {
+    @tailrec def assignLabel(w:Int, t:Int, p:Int) : Unit = {
       val b = inblossom(w)
       assert((label(w) | label(b)) == 0)
       label(w) = t
@@ -199,7 +201,7 @@ object WMMatching {
     // or an augmenting path. Return the base vertex of the new blossom or -1.
     def scanBlossom(v:Int, w:Int) = {
       // Trace back from v and w, placing breadcrumbs as we go.
-      def scan(v:Int, w:Int, path: List[Int]) : (Int, List[Int]) = {
+      @tailrec def scan(v:Int, w:Int, path: List[Int]) : (Int, List[Int]) = {
         if (v == -1 && w == -1) (-1, path) //not found
         else {
           // Look for a breadcrumb in v's blossom or put a new breadcrumb.
@@ -252,7 +254,7 @@ object WMMatching {
       blossomparent(bb) = b
       // Make list of sub-blossoms and their interconnecting edge endpoints.
 
-      def traceBack(v:Int, d:Int, path:List[Int], endps:List[Int]): (List[Int], List[Int]) = {
+      @tailrec def traceBack(v:Int, d:Int, path:List[Int], endps:List[Int]): (List[Int], List[Int]) = {
         val bv = inblossom(v)
         if (bv == bb) (path, endps)
         else {
@@ -465,7 +467,7 @@ object WMMatching {
       // Match vertex s to remote endpoint p. Then trace back from s
       // until we find a single vertex, swapping matched and unmatched
       // edges as we go.
-      def f(s:Int, p:Int) : Unit = {
+      @tailrec def f(s:Int, p:Int) : Unit = {
         val bs = inblossom(s)
         assert(label(bs) == 1)
         assert(labelend(bs) == mate(blossombase(bs)))
@@ -499,8 +501,7 @@ object WMMatching {
       f(v, 2*k+1)
       f(w, 2*k)
     }
-
-    def substage () : Boolean = {
+    @tailrec def substage () : Boolean = {
       if (queue.isEmpty) false
       else {
         // Take an S vertex from the queue.
@@ -687,8 +688,8 @@ object WMMatching {
     }
 
     // Main loop: continue until no further improvement is possible.
-    def mainLoop(iterations: Int) : Unit = {
-      def stage() : Boolean = {
+    @tailrec def mainLoop(iterations: Int) : Unit = {
+      @tailrec def stage() : Boolean = {
         if (substage()) true
         else if (!updateDual()) false
         else stage()
