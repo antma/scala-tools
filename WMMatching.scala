@@ -176,7 +176,7 @@ object WMMatching {
 
     def assignLabel(w:Int, t:Int, p:Int) : Unit = {
       val b = inblossom(w)
-      assert(label(w) == 0 && label(b) == 0)
+      assert((label(w) | label(b)) == 0)
       label(w) = t
       label(b) = t
       labelend(w) = p
