@@ -733,7 +733,7 @@ object WMMatching {
     mate
   }
   def minWeightMatching (edges: Array[(Int, Int, Int)]) : Array[Int] = {
-    val maxweight = edges.map(_._3).max
+    val maxweight = edges.view.map(_._3).max
     maxWeightMatching (edges.map { x => (x._1, x._2, maxweight - x._3) }, true)
   }
   def fullGraph(nvertex: Int, pairScore : (Int, Int) => Int) : Array[(Int, Int, Int)] =
