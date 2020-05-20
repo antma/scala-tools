@@ -26,9 +26,10 @@ object WMMatchingTest {
       }
     }
     def score(l: List[(Int, Int)]): (Int, Int) = (l.length, l.map (t => pairScore(t._1, t._2).head).sum)
+    def checkScore(ans: (Int, Int)): Boolean = ans._1 == res._1 && ans._2 == res._2
     val m = WMMatching(v, pairScore)
     m match {
-      case Success(l) => score(l) == res
+      case Success(l) => checkScore(score(l))
       case Failure(_) => false
     }
   }
