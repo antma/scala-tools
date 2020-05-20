@@ -10,7 +10,7 @@ void header () {
   writeln (q"HEADER
 package lila.common
 //import lila.common.WMMatching
-import scala.util.{Try, Success, Failure}
+import scala.util.{Success, Failure}
 import org.specs2.mutable.Specification
 
 object WMMatchingTest {
@@ -29,7 +29,7 @@ object WMMatchingTest {
     val m = WMMatching(v, pairScore)
     m match {
       case Success(l) => score(l) == res
-      case Failure(e) => false
+      case Failure(_) => false
     }
   }
 }
