@@ -1,0 +1,10 @@
+sudo: false
+language: scala
+
+# https://docs.travis-ci.com/user/languages/java/#Testing-Against-Multiple-JDKs
+jdk:
+  - openjdk8
+
+script:
+  - sbt compile
+  - sbt test
