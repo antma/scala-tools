@@ -9,7 +9,6 @@ alias P = Tuple!(int, int);
 void header () {
   writeln (q"HEADER
 package lila.common
-//import lila.common.WMMatching
 import scala.util.{Success, Failure}
 import org.specs2.mutable.Specification
 
@@ -100,14 +99,11 @@ void gen (int vertices, int edges, int v) {
 
 void checks () {
   rndGen.seed (20200521);
-  gen (2, 1, 10);
-  /*
-  foreach (n; 2 .. 10) {
+  foreach (n; 2 .. 21) {
     foreach (p; [5, 10, 25, 50, 100]) {
       gen (n, (((n * (n - 1)) / 2) * p) / 100, 100);
     }
   }
-  */
 }
 
 void main () {
