@@ -447,15 +447,9 @@ object WMMatching {
     def augmentBlossom(b: Int, v: Int): Unit = {
       // Bubble up through the blossom tree from vertex v to an immediate
       // isub-blossom of b.
-      def rotate(a: Array[Int], shift: Int): Array[Int] = {
-        if (shift == 0) a
-        else {
-          val n = a.length
-          val b: Array[Int] = new Array(n)
-          Array.copy(a, shift, b, 0, n - shift)
-          Array.copy(a, 0, b, n - shift, shift)
-          b
-        }
+      def rotate(src: Array[Int], dst: Array[Int], n: Int, shift: Int) {
+        Array.copy(src, shift, dst, 0, n - shift)
+        Array.copy(src, 0, dst, n - shift, shift)
       }
       var t = v
       while (blossomparent(t) != b) {
@@ -489,8 +483,15 @@ object WMMatching {
         mate(endpoint(p ^ 1)) = p
       }
       // Rotate the list of sub-blossoms to put the new base at the front.
-      blossomchilds(b) = rotate(blossomchilds(b), i)
-      blossomendps(b) = rotate(blossomendps(b), i)
+      if(i > 0) {
+        val n = blossomchilds(b).length
+        val t = new Array[Int](n)
+        rotate(blossomchilds(b), t, n, i)
+        val u = blossomchilds(b)
+        blossomchilds(b) = t
+        rotate(blossomendps(b), u, n, i)
+        blossomendps(b) = u
+      }
       blossombase(b) = blossombase(blossomchilds(b)(0))
     }
 
@@ -761,5 +762,4 @@ object WMMatching {
       p <- pairScore(i, j)
     } yield (i, j, p)
   }.toArray
-
 }
