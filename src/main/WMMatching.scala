@@ -446,7 +446,7 @@ object WMMatching {
     def augmentBlossom(b: Int, v: Int): Unit = {
       // Bubble up through the blossom tree from vertex v to an immediate
       // isub-blossom of b.
-      def rotate(src: Array[Int], dst: Array[Int], n: Int, shift: Int) {
+      def rotate(src: Array[Int], dst: Array[Int], n: Int, shift: Int) = {
         Array.copy(src, shift, dst, 0, n - shift)
         Array.copy(src, 0, dst, n - shift, shift)
       }
@@ -635,7 +635,7 @@ object WMMatching {
 
       // Compute delta1: the minimum value of any vertex dual.
       if (!maxcardinality) {
-        dt_update(1, dualvar.view(0, nvertex).min, -1)
+        dt_update(1, dualvar.slice(0, nvertex).min, -1)
       }
 
       // Compute delta2: the minimum slack on any edge between
@@ -667,7 +667,7 @@ object WMMatching {
         // No further improvement possible; max-cardinality optimum
         // reached. Do a final delta update to make the optimum
         // verifyable.
-        dt_update(1, 0.max(dualvar.view(0, nvertex).min), -1)
+        dt_update(1, 0.max(dualvar.slice(0, nvertex).min), -1)
       }
 
       // Update dual variables according to delta.
