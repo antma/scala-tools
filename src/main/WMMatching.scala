@@ -446,7 +446,7 @@ object WMMatching {
     def augmentBlossom(b: Int, v: Int): Unit = {
       // Bubble up through the blossom tree from vertex v to an immediate
       // isub-blossom of b.
-      def rotate(src: Array[Int], dst: Array[Int], n: Int, shift: Int) = {
+      def rotate(src: Array[Int], dst: Array[Int], n: Int, shift: Int):Unit = {
         Array.copy(src, shift, dst, 0, n - shift)
         Array.copy(src, 0, dst, n - shift, shift)
       }
