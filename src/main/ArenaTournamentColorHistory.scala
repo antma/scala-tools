@@ -1,3 +1,4 @@
+package lila.tournament
 //positive strike -> user played straight strike games by white pieces
 //negative strike -> black pieces
 class ArenaTournamentColorHistory(val strike: Int, val balance: Int) {
@@ -29,5 +30,6 @@ class ArenaTournamentColorHistory(val strike: Int, val balance: Int) {
 
 object ArenaTournamentColorHistory {
   private def packToUnsignedShort(v: Int): Int = (v + 0x8000).max(0).min(0xffff)
+  def apply() = new ArenaTournamentColorHistory(0, 0)
   def apply(v : Int) = new ArenaTournamentColorHistory((v >> 16) - 0x8000, (v & 0xffff) - 0x8000)
 }
