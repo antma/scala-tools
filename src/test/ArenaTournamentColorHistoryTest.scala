@@ -14,11 +14,20 @@ object ArenaTournamentColorHistoryTest {
 
 class ArenaTournamentColorHistoryTest extends Specification {
   "arena tournament color history" should {
-     "data" in {
+     "reduce" in {
        ArenaTournamentColorHistoryTest.reduce("WWW") must_== (3, 3)
        ArenaTournamentColorHistoryTest.reduce("WWWB") must_== (-1, 2)
        ArenaTournamentColorHistoryTest.reduce("BBB") must_== (-3, -3)
        ArenaTournamentColorHistoryTest.reduce("BBBW") must_== (1, -2)
+       ArenaTournamentColorHistoryTest.reduce("WWWBBB") must_== (-3, 0)
+    }
+    "couldPlay" in {
+      ArenaTournamentColorHistoryTest.reduce("WWW").couldPlay(
+        ArenaTournamentColorHistoryTest.reduce("WWW", 3) must beFalse
+      ArenaTournamentColorHistoryTest.reduce("BBB").couldPlay(
+        ArenaTournamentColorHistoryTest.reduce("BBB", 3) must beFalse
+      ArenaTournamentColorHistoryTest.reduce("BB").couldPlay(
+        ArenaTournamentColorHistoryTest.reduce("BB", 3) must beTrue
     }
   }
 }
