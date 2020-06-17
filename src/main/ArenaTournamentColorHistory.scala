@@ -14,9 +14,9 @@ class ArenaTournamentColorHistory(val strike: Int, val balance: Int) {
   //returns packed value after updating color history
   def incColor(value: Int): Int = {
     if (value > 0) {
-      new ArenaTournamentColorHistory( (strike + 1).min (1), balance + 1).toInt
+      new ArenaTournamentColorHistory( (strike + 1).max (1), balance + 1).toInt
     } else {
-      new ArenaTournamentColorHistory( (strike - 1).max (-1), balance - 1).toInt
+      new ArenaTournamentColorHistory( (strike - 1).min (-1), balance - 1).toInt
     }
   }
   //couldn't play if both players played maxStrike blacks games before
@@ -28,6 +28,6 @@ class ArenaTournamentColorHistory(val strike: Int, val balance: Int) {
 }
 
 object ArenaTournamentColorHistory {
-  private def packToUnsignedShort(v: Int): Int = (v + 0x8000).min(0).max(0xffff)
+  private def packToUnsignedShort(v: Int): Int = (v + 0x8000).max(0).min(0xffff)
   def apply(v : Int) = new ArenaTournamentColorHistory((v >> 16) - 0x8000, (v & 0xffff) - 0x8000)
 }
