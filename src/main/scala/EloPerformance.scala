@@ -1,4 +1,4 @@
-
+package lila.common
 
 object EloPerformance {
   #FIDE Title Regulations effective from 1 July 2014 till 30 June 2017
