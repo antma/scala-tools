@@ -4,7 +4,12 @@ package lila.tournament
 class ArenaTournamentColorHistory private(val strike: Int, val balance: Int) extends Ordered[ArenaTournamentColorHistory] {
   import ArenaTournamentColorHistory.{lo, hi}
   def toInt = ((strike - lo) << 16) | (balance - lo)
-  def compare(that: ArenaTournamentColorHistory): Int = {
+  override def hashCode = toInt
+  override def equals(other: Any) = other match {
+    case that: ArenaTournamentColorHistory => strike == that.strike && balance == that.balance
+    case _ => false
+  }
+  override def compare(that: ArenaTournamentColorHistory): Int = {
     if (strike < that.strike) -1
     else if (strike > that.strike) 1
     else if (balance < that.balance) -1

@@ -2,7 +2,7 @@ package lila.tournament
 import org.specs2.mutable.Specification
 
 object ArenaTournamentColorHistoryTest {
-  private def apply(s: String): ArenaTournamentColorHistory = {
+  def apply(s: String): ArenaTournamentColorHistory = {
     s.foldLeft(ArenaTournamentColorHistory(None)) { (acc, c) => c match {
       case 'W' => acc.incColor(1)
       case 'B' => acc.incColor(-1)
@@ -16,7 +16,7 @@ object ArenaTournamentColorHistoryTest {
 }
 
 class ArenaTournamentColorHistoryTest extends Specification {
-  import ArenaTournamentColorHistoryTest.{ unpack, couldPlay, sameColors, firstGetsWhite, toTuple2 }
+  import ArenaTournamentColorHistoryTest.{ apply, unpack, couldPlay, sameColors, firstGetsWhite, toTuple2 }
   "arena tournament color history" should {
      "hand tests" in {
        unpack("WWW") must be equalTo((3, 3))
@@ -51,6 +51,10 @@ class ArenaTournamentColorHistoryTest extends Specification {
       toTuple2(minh.incColor(-1)) must be equalTo toTuple2(minh)
       val maxh = ArenaTournamentColorHistory.maxValue
       toTuple2(maxh.incColor(1)) must be equalTo toTuple2(maxh)
+    }
+    "equals" in {
+      apply("") must be equalTo apply("")
+      apply("WBW") must be equalTo apply("W")
     }
   }
 }
