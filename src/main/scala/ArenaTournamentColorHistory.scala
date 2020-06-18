@@ -38,4 +38,6 @@ object ArenaTournamentColorHistory {
       case None    => new ArenaTournamentColorHistory(0, 0)
     }
   }
+  def minValue: ArenaTournamentColorHistory = apply(0)
+  def maxValue: ArenaTournamentColorHistory = apply(-1)
 }

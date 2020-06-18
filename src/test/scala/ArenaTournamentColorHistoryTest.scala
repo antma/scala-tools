@@ -8,17 +8,15 @@ object ArenaTournamentColorHistoryTest {
       case 'B' => acc.incColor(-1)
     }}
   }
-  def unpack(s: String): (Int, Int) = {
-    val x = apply(s)
-    (x.strike, x.balance)
-  }
+  def toTuple2(history: ArenaTournamentColorHistoryTest): (Int, Int) = (history.strike, history.balance)
+  def unpack(s: String): (Int, Int) = apply(s).toTuple2
   def couldPlay(s1: String, s2: String, maxStreak: Int): Boolean = apply(s1).couldPlay(apply(s2), maxStreak)
   def sameColors(s1: String, s2: String): Boolean = apply(s1).sameColors(apply(s2))
   def firstGetsWhite(s1: String, s2: String): Boolean = apply(s1).firstGetsWhite(apply(s2))
 }
 
 class ArenaTournamentColorHistoryTest extends Specification {
-  import ArenaTournamentColorHistoryTest.{ unpack, couldPlay, sameColors, firstGetsWhite }
+  import ArenaTournamentColorHistoryTest.{ unpack, couldPlay, sameColors, firstGetsWhite, toTuple2 }
   "arena tournament color history" should {
      "hand tests" in {
        unpack("WWW") must be equalTo((3, 3))
@@ -45,8 +43,14 @@ class ArenaTournamentColorHistoryTest extends Specification {
       firstGetsWhite("BB", "WBB") must beTrue
     }
     "serialization" in {
-      ArenaTournamentColorHistory(Some(-1)) must be equalTo((0x7fff, 0x7fff))
-      ArenaTournamentColorHistory(Some(0)) must be equalTo((-0x8000, -0x8000))
+      toTuple2(ArenaTournamentColorHistory(Some(-1))) must be equalTo((0x7fff, 0x7fff))
+      toTuple2(ArenaTournamentColorHistory(Some(0))) must be equalTo((-0x8000, -0x8000))
+    }
+    "min/(max)Value incColor" in {
+      val minh = ArenaTournamentColorHistoryTest.minValue
+      toTuple2(minh.incColor(-1)) must be equalTo toTuple2(minh)
+      val maxh = ArenaTournamentColorHistoryTest.maxValue
+      toTuple2(maxh.incColor(1)) must be equalTo toTuple2(maxh)
     }
   }
 }
