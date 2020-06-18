@@ -36,7 +36,8 @@ class ArenaTournamentColorHistory private(val strike: Int, val balance: Int) ext
     (strike > -maxStrike || that.strike > -maxStrike) &&  
     (strike < maxStrike || that.strike < maxStrike)
   }
-  //add some penalty for pairs when both players have played same colors
+  //add some penalty for pairs when both players have played last game with same color
+  //heuristics: after such pairing one streak will be always incremented
   def sameColors(that: ArenaTournamentColorHistory): Boolean = strike.sign * that.strike.sign > 0
 }
 
