@@ -44,5 +44,9 @@ class ArenaTournamentColorHistoryTest extends Specification {
       firstGetsWhite("WW", "BWW") must beFalse
       firstGetsWhite("BB", "WBB") must beTrue
     }
+    "serialization" in {
+      ArenaTournamentColorHistory(Some(-1)) must be equalTo((0x7fff, 0x7fff))
+      ArenaTournamentColorHistory(Some(0)) must be equalTo((-0x8000, -0x8000))
+    }
   }
 }

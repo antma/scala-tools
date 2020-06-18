@@ -34,7 +34,7 @@ object ArenaTournamentColorHistory {
   private def packToUnsignedShort(v: Int): Int = (v + 0x8000).max(0).min(0xffff)
   def apply(o: Option[Int]): ArenaTournamentColorHistory = {
     o match {
-      case Some(v) => new ArenaTournamentColorHistory((v >> 16) - 0x8000, (v & 0xffff) - 0x8000)
+      case Some(v) => new ArenaTournamentColorHistory((v >>> 16) - 0x8000, (v & 0xffff) - 0x8000)
       case None    => new ArenaTournamentColorHistory(0, 0)
     }
   }
