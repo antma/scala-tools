@@ -1,14 +1,18 @@
 package lila.tournament
 //positive strike -> user played straight strike games by white pieces
 //negative strike -> black pieces
-class ArenaTournamentColorHistory private(val strike: Int, val balance: Int) {
+class ArenaTournamentColorHistory private(val strike: Int, val balance: Int) extends Ordered[ArenaTournamentColorHistory] {
   def toInt = (ArenaTournamentColorHistory.packToUnsignedShort(strike) << 16) | ArenaTournamentColorHistory.packToUnsignedShort(balance)
+  def compare(that: ArenaTournamentColorHistory): Int = {
+    if (strike < that.strike) -1
+    else if (strike > that.strike) 1
+    else if (balance < that.balance) -1
+    else if (balance > that.balance) 1
+    else 0
+  }
   def firstGetsWhite(that: ArenaTournamentColorHistory) = {
-    if (strike < that.strike) true
-    else if (strike > that.strike) false
-    else if (balance < that.balance) true
-    else if (balance > that.balance) false
-    else scala.util.Random.nextBoolean
+    val c = compare(that)
+    (c < 0) || (c == 0 && scala.util.Random.nextBoolean)
   }
   //value > 0 -> user plays by white pieces
   //value < 0 -> user plays by black pieces
@@ -38,6 +42,6 @@ object ArenaTournamentColorHistory {
       case None    => new ArenaTournamentColorHistory(0, 0)
     }
   }
-  def minValue: ArenaTournamentColorHistory = apply(0)
-  def maxValue: ArenaTournamentColorHistory = apply(-1)
+  def minValue: ArenaTournamentColorHistory = apply(Some(0))
+  def maxValue: ArenaTournamentColorHistory = apply(Some(-1))
 }
