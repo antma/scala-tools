@@ -35,7 +35,7 @@ class ArenaTournamentColorHistory private(val strike: Int, val balance: Int) ext
 }
 
 object ArenaTournamentColorHistory {
-  private def packToUnsignedShort(v: Int): Int = (v + 0x8000).max(0).min(0xffff)
+  private def packToUnsignedShort(v: Int): Int = (v + 0x8000).max(-0x8000).min(0x7fff)
   def apply(o: Option[Int]): ArenaTournamentColorHistory = {
     o match {
       case Some(v) => new ArenaTournamentColorHistory((v >>> 16) - 0x8000, (v & 0xffff) - 0x8000)
