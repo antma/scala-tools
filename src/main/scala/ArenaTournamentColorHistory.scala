@@ -3,7 +3,7 @@ package lila.tournament
 //negative strike -> black pieces
 class ArenaTournamentColorHistory private(val strike: Int, val balance: Int) {
   def toInt = (ArenaTournamentColorHistory.packToUnsignedShort(strike) << 16) | ArenaTournamentColorHistory.packToUnsignedShort(balance)
-  def firstGetWhite(that: ArenaTournamentColorHistory) = {
+  def firstGetsWhite(that: ArenaTournamentColorHistory) = {
     if (strike < that.strike) true
     else if (strike > that.strike) false
     else if (balance < that.balance) true
