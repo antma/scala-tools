@@ -1,5 +1,4 @@
 package lila.tournament
-import scala.util.{Success, Failure}
 import org.specs2.mutable.Specification
 
 object ArenaTournamentColorHistoryTest {
