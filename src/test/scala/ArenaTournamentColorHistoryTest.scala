@@ -23,17 +23,17 @@ class ArenaTournamentColorHistoryTest extends Specification {
     }
     "couldPlay" in {
       ArenaTournamentColorHistoryTest("WWW").couldPlay(
-        ArenaTournamentColorHistoryTest("WWW", 3) must beFalse
+        ArenaTournamentColorHistoryTest("WWW"), 3) must beFalse
       ArenaTournamentColorHistoryTest("BBB").couldPlay(
-        ArenaTournamentColorHistoryTest("BBB", 3) must beFalse
+        ArenaTournamentColorHistoryTest("BBB"), 3) must beFalse
       ArenaTournamentColorHistoryTest("BB").couldPlay(
-        ArenaTournamentColorHistoryTest("BB", 3) must beTrue
+        ArenaTournamentColorHistoryTest("BB"), 3) must beTrue
     }
     "sameColors" in {
       ArenaTournamentColorHistoryTest("WWW").sameColors(
-        ArenaTournamentColorHistoryTest("W") must beTrue
+        ArenaTournamentColorHistoryTest("W")) must beTrue
       ArenaTournamentColorHistoryTest("B").sameColors(
-        ArenaTournamentColorHistoryTest("BBB") must beTrue
+        ArenaTournamentColorHistoryTest("BBB")) must beTrue
     }
   }
 }
