@@ -2,7 +2,8 @@ package lila.tournament
 //positive strike -> user played straight strike games by white pieces
 //negative strike -> black pieces
 class ArenaTournamentColorHistory private(val strike: Int, val balance: Int) extends Ordered[ArenaTournamentColorHistory] {
-  def toInt = (ArenaTournamentColorHistory.packToUnsignedShort(strike) << 16) | ArenaTournamentColorHistory.packToUnsignedShort(balance)
+  import ArenaTournamentColorHistory.{lo, hi}
+  def toInt = ((strike - lo) << 16) | (balance - lo)
   def compare(that: ArenaTournamentColorHistory): Int = {
     if (strike < that.strike) -1
     else if (strike > that.strike) 1
@@ -19,9 +20,9 @@ class ArenaTournamentColorHistory private(val strike: Int, val balance: Int) ext
   //returns packed value after updating color history
   def incColor(value: Int): ArenaTournamentColorHistory = {
     if (value > 0) {
-      new ArenaTournamentColorHistory( (strike + 1).max (1), balance + 1)
+      new ArenaTournamentColorHistory((strike + 1).max(1).min(hi), (balance + 1).min(hi))
     } else {
-      new ArenaTournamentColorHistory( (strike - 1).min (-1), balance - 1)
+      new ArenaTournamentColorHistory((strike - 1).min(-1).max(lo), (balance - 1).max(lo))
     }
   }
   //couldn't play if both players played maxStrike blacks games before
@@ -35,10 +36,12 @@ class ArenaTournamentColorHistory private(val strike: Int, val balance: Int) ext
 }
 
 object ArenaTournamentColorHistory {
-  private def packToUnsignedShort(v: Int): Int = (v + 0x8000).max(-0x8000).min(0x7fff)
+  private val lo = -0x8000
+  private val hi = 0x7fff
+  private val mask = 0xffff
   def apply(o: Option[Int]): ArenaTournamentColorHistory = {
     o match {
-      case Some(v) => new ArenaTournamentColorHistory((v >>> 16) - 0x8000, (v & 0xffff) - 0x8000)
+      case Some(v) => new ArenaTournamentColorHistory((v >>> 16) + lo, (v & mask) + lo)
       case None    => new ArenaTournamentColorHistory(0, 0)
     }
   }
