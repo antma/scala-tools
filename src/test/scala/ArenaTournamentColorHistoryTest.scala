@@ -15,14 +15,16 @@ object ArenaTournamentColorHistoryTest {
   }
 }
 
+//must be equalTo
+
 class ArenaTournamentColorHistoryTest extends Specification {
   "arena tournament color history" should {
      "hand tests" in {
-       ArenaTournamentColorHistoryTest.unpack("WWW") must_== (3, 3)
-       ArenaTournamentColorHistoryTest.unpack("WWWB") must_== (-1, 2)
-       ArenaTournamentColorHistoryTest.unpack("BBB") must_== (-3, -3)
-       ArenaTournamentColorHistoryTest.unpack("BBBW") must_== (1, -2)
-       ArenaTournamentColorHistoryTest.unpack("WWWBBB") must_== (-3, 0)
+       ArenaTournamentColorHistoryTest.unpack("WWW") must be equalTo((3, 3))
+       ArenaTournamentColorHistoryTest.unpack("WWWB") must be equalTo((-1, 2))
+       ArenaTournamentColorHistoryTest.unpack("BBB") must be equalTo((-3, -3))
+       ArenaTournamentColorHistoryTest.unpack("BBBW") must be equalTo((1, -2))
+       ArenaTournamentColorHistoryTest.unpack("WWWBBB") must be equalTo((-3, 0))
     }
     "couldPlay" in {
       ArenaTournamentColorHistoryTest("WWW").couldPlay(

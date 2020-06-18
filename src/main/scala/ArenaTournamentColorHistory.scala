@@ -27,7 +27,7 @@ class ArenaTournamentColorHistory private(val strike: Int, val balance: Int) {
     (strike < maxStrike || that.strike < maxStrike)
   }
   //add some penalty for pairs when both players have played same colors
-  def sameColors(that: ArenaTournamentColorHistory): Boolean = strike.signum * that.strike.signum > 0
+  def sameColors(that: ArenaTournamentColorHistory): Boolean = strike.sign * that.strike.sign > 0
 }
 
 object ArenaTournamentColorHistory {
