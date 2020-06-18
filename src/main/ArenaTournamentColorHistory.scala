@@ -1,8 +1,8 @@
 package lila.tournament
 //positive strike -> user played straight strike games by white pieces
 //negative strike -> black pieces
-class ArenaTournamentColorHistory(val strike: Int, val balance: Int) {
-  private def toInt = (ArenaTournamentColorHistory.packToUnsignedShort(strike) << 16) | ArenaTournamentColorHistory.packToUnsignedShort (balance)
+class ArenaTournamentColorHistory private(val strike: Int, val balance: Int) {
+  def toInt = (ArenaTournamentColorHistory.packToUnsignedShort(strike) << 16) | ArenaTournamentColorHistory.packToUnsignedShort(balance)
   def firstGetWhite(that: ArenaTournamentColorHistory) = {
     if (strike < that.strike) true
     else if (strike > that.strike) false
@@ -13,11 +13,11 @@ class ArenaTournamentColorHistory(val strike: Int, val balance: Int) {
   //value > 0 -> user plays by white pieces
   //value < 0 -> user plays by black pieces
   //returns packed value after updating color history
-  def incColor(value: Int): Int = {
+  def incColor(value: Int): ArenaTournamentColorHistory = {
     if (value > 0) {
-      new ArenaTournamentColorHistory( (strike + 1).max (1), balance + 1).toInt
+      new ArenaTournamentColorHistory( (strike + 1).max (1), balance + 1)
     } else {
-      new ArenaTournamentColorHistory( (strike - 1).min (-1), balance - 1).toInt
+      new ArenaTournamentColorHistory( (strike - 1).min (-1), balance - 1)
     }
   }
   //couldn't play if both players played maxStrike blacks games before
@@ -26,10 +26,16 @@ class ArenaTournamentColorHistory(val strike: Int, val balance: Int) {
     (strike > -maxStrike || that.strike > -maxStrike) &&  
     (strike < maxStrike || that.strike < maxStrike)
   }
+  //add some penalty for pairs when both players have played same colors
+  def sameColors(that: ArenaTournamentColorHistory): Boolean = strike.signum * that.strike.signum > 0
 }
 
 object ArenaTournamentColorHistory {
   private def packToUnsignedShort(v: Int): Int = (v + 0x8000).max(0).min(0xffff)
-  def apply() = new ArenaTournamentColorHistory(0, 0)
-  def apply(v : Int) = new ArenaTournamentColorHistory((v >> 16) - 0x8000, (v & 0xffff) - 0x8000)
+  def apply(o: Option[Int]): ArenaTournamentColorHistory = {
+    o match {
+      case Some(v) => new ArenaTournamentColorHistory((v >> 16) - 0x8000, (v & 0xffff) - 0x8000)
+      case None    => new ArenaTournamentColorHistory(0, 0)
+    }
+  }
 }
