@@ -43,8 +43,8 @@ class ArenaTournamentColorHistoryTest extends Specification {
       firstGetsWhite("BB", "WBB") must beTrue
     }
     "serialization" in {
-      toTuple2(ArenaTournamentColorHistory(-1.some)) must be equalTo((0x7fff, 0x7fff))
-      toTuple2(ArenaTournamentColorHistory(0.some)) must be equalTo((-0x8000, -0x8000))
+      toTuple2(ArenaTournamentColorHistory(Some(-1))) must be equalTo((0x7fff, 0x7fff))
+      toTuple2(ArenaTournamentColorHistory(Some(0))) must be equalTo((-0x8000, -0x8000))
     }
     "min/(max)Value incColor" in {
       val minh = ArenaTournamentColorHistory.minValue
