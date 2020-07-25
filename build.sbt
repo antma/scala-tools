@@ -4,7 +4,7 @@ organization := "org.lichess"
 
 version := "1.0"
 
-scalaVersion := "2.13.2"
+scalaVersion := "2.13.3"
 
 libraryDependencies ++= List(
   "org.specs2"             %% "specs2-core"              % "4.7.0" % "test"
