@@ -731,12 +731,11 @@ object WMMatching {
   }
 
   private def fullGraph(nvertex: Int, pairScore: (Int, Int) => Option[Int]): (Array[Int], Array[Int]) = {
-    import scala.collection.mutable.ArrayBuilder.ofInt
-    val m = (nvertex * (nvertex - 1)) >> 1
-    val e = new ofInt()
-    e.sizeHint (m << 1)
-    val w = new ofInt()
+    val m = nvertex * (nvertex - 1)
+    val e = Array.newBuilder[Int]
     e.sizeHint (m)
+    val w = Array.newBuilder[Int]
+    e.sizeHint (m >> 1)
     for {i <- 0 until (nvertex - 1)
          j <- (i+1) until nvertex
          p <- pairScore(i, j)} {
@@ -744,6 +743,6 @@ object WMMatching {
       e += j
       w += p
     }
-    (e.result, w.result)
+    (e.result(), w.result())
   }
 }
